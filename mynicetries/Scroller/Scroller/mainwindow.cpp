@@ -3,7 +3,6 @@
 #include <QString>
 #include <QDebug>
 #include <QDate>
-//#include "mytablewidget.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fillYearTable(*ui->twYear);
     fillMonthTable(*ui->twMonth);
-    fillDayTable(*ui->twDay);
+    fillDayTable(*ui->twDay, curDate.daysInMonth());
 }
 
 MainWindow::~MainWindow()
@@ -31,15 +30,13 @@ void MainWindow::fillYearTable(QTableWidget& tableYear)
     int j = 0;
     QTableWidgetItem *newItem;
     tableYear.setColumnCount(1);
-    //QDate Today = QDate::currentDate();
-    //ui->twYear->setSelectionBehavior(QAbstractItemView::SelectRows);
-    for(int i = -5; i<6; i++)
+    for(int i = PASTYEARS; i < FUTUREYEARS; i++)
     {
         tableYear.insertRow(j);
         newItem = new QTableWidgetItem();
-        newItem->setText(QString::number(curDate.year() + i));
+        newItem->setText(QString::number(selDate.year() + i));
         tableYear.setItem(j, 0, newItem);
-        if((curDate.year() + i) == curDate.year())
+        if((selDate.year() + i) == selDate.year())
             tableYear.item(j, 0)->setBackground(Qt::red);
         else
             tableYear.item(j, 0)->setBackground(Qt::cyan);
@@ -53,13 +50,13 @@ void MainWindow::fillMonthTable(QTableWidget& tableMonth)
     int j = 0;
     QTableWidgetItem *newItem;
     tableMonth.setColumnCount(1);
-    for(int i = 1; i<13; i++)
+    for(int i = 1; i < MONTHS+1; i++)
     {
         tableMonth.insertRow(j);
         newItem = new QTableWidgetItem();
         newItem->setText(QString::number(i));
         tableMonth.setItem(j, 0, newItem);
-        if(i == curDate.month())
+        if(i == selDate.month())
             tableMonth.item(j, 0)->setBackground(Qt::red);
         else
             tableMonth.item(j, 0)->setBackground(Qt::magenta);
@@ -68,18 +65,21 @@ void MainWindow::fillMonthTable(QTableWidget& tableMonth)
     standartStuffForAllTables(*ui->twMonth);
 }
 
-void MainWindow::fillDayTable(QTableWidget& tableDay)
+void MainWindow::fillDayTable(QTableWidget& tableDay, int daysInMonth)
 {
+    tableDay.clear();
+    tableDay.setRowCount(0);
+
     int j = 0;
     QTableWidgetItem *newItem;
     tableDay.setColumnCount(1);
-    for(int i = 1; i<32; i++)
+    for(int i = 1; i < daysInMonth+1; i++)
     {
         tableDay.insertRow(j);
         newItem = new QTableWidgetItem();
         newItem->setText(QString::number(i));
         tableDay.setItem(j, 0, newItem);
-        if(i == curDate.day())
+        if(i == selDate.day())
             tableDay.item(j, 0)->setBackground(Qt::red);
         else
             tableDay.item(j, 0)->setBackground(Qt::yellow);
@@ -100,36 +100,29 @@ void MainWindow::standartStuffForAllTables(QTableWidget& table)
     table.setFocusPolicy(Qt::NoFocus);
 }
 
-/*void QTableWidget::mousePressEvent(QMouseEvent* event)
-{
-    if (itemAt(event->pos()))
-        QTableWidget::mousePressEvent(event);
-    else
-        clearSelection();
-}*/
-
 void MainWindow::on_twYear_itemClicked(QTableWidgetItem *item)
 {
-    for(int i=0; i<ui->twYear->rowCount(); i++)
+    for(int i = 0; i < ui->twYear->rowCount(); i++)
         ui->twYear->item(i, 0)->setBackground(Qt::cyan);
     item->setBackground(Qt::red);
-
-    //item->row();
-    //???
+    selDate.setDate(item->text().toInt(), selDate.month(), 1);
+    ui->textEditSel->setText(selDate.toString());
+    fillDayTable(*ui->twDay, selDate.daysInMonth());
 }
 
 void MainWindow::on_twMonth_itemClicked(QTableWidgetItem *item)
 {
-    for(int i=0; i<ui->twMonth->rowCount(); i++)
+    for(int i = 0; i < ui->twMonth->rowCount(); i++)
         ui->twMonth->item(i, 0)->setBackground(Qt::magenta);
     item->setBackground(Qt::red);
-    selDate.setDate(selDate.year(), item->row()+1, selDate.day());
+    selDate.setDate(selDate.year(), item->row()+1, 1);
     ui->textEditSel->setText(selDate.toString());
+    fillDayTable(*ui->twDay, selDate.daysInMonth());
 }
 
 void MainWindow::on_twDay_itemClicked(QTableWidgetItem *item)
 {
-    for(int i=0; i<ui->twDay->rowCount(); i++)
+    for(int i = 0; i < ui->twDay->rowCount(); i++)
         ui->twDay->item(i, 0)->setBackground(Qt::yellow);
     item->setBackground(Qt::red);
     selDate.setDate(selDate.year(), selDate.month(), item->row()+1);

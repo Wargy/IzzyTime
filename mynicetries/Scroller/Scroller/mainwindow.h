@@ -5,6 +5,10 @@
 #include <QDate>
 #include <QTableWidget>
 
+#define PASTYEARS -5
+#define FUTUREYEARS 6
+#define MONTHS 12
+
 namespace Ui {
 class MainWindow;
 }
@@ -25,15 +29,13 @@ private slots:
 private:
     void fillYearTable(QTableWidget& tableYear);
     void fillMonthTable(QTableWidget& tableMonth);
-    void fillDayTable(QTableWidget& tableDay);
+    void fillDayTable(QTableWidget& tableDay, int daysInMonth);
     void standartStuffForAllTables(QTableWidget& table);
 
 private:
     Ui::MainWindow *ui;
     QDate curDate;
-    //int curRow;
     QDate selDate;
-    //int selRow;
 };
 
 #endif // MAINWINDOW_H
