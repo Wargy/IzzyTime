@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -32,11 +33,12 @@ public:
     QTableWidget *twYear;
     QTableWidget *twMonth;
     QTableWidget *twDay;
-    QTableWidget *twTimeLine;
-    QTableWidget *twNotes;
+    QTableWidget *twTaskField;
+    QTableWidget *twHangedTaskField;
     QPushButton *btDay;
     QPushButton *btWeek;
     QPushButton *btCalendar;
+    QLabel *lSelDate;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -45,7 +47,10 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
+        MainWindow->setEnabled(true);
         MainWindow->resize(800, 600);
+        MainWindow->setMinimumSize(QSize(800, 600));
+        MainWindow->setMaximumSize(QSize(800, 600));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         btCurDate = new QPushButton(centralWidget);
@@ -63,12 +68,12 @@ public:
         twDay = new QTableWidget(centralWidget);
         twDay->setObjectName(QStringLiteral("twDay"));
         twDay->setGeometry(QRect(70, 70, 31, 471));
-        twTimeLine = new QTableWidget(centralWidget);
-        twTimeLine->setObjectName(QStringLiteral("twTimeLine"));
-        twTimeLine->setGeometry(QRect(120, 20, 301, 501));
-        twNotes = new QTableWidget(centralWidget);
-        twNotes->setObjectName(QStringLiteral("twNotes"));
-        twNotes->setGeometry(QRect(435, 20, 301, 501));
+        twTaskField = new QTableWidget(centralWidget);
+        twTaskField->setObjectName(QStringLiteral("twTaskField"));
+        twTaskField->setGeometry(QRect(120, 40, 301, 501));
+        twHangedTaskField = new QTableWidget(centralWidget);
+        twHangedTaskField->setObjectName(QStringLiteral("twHangedTaskField"));
+        twHangedTaskField->setGeometry(QRect(440, 40, 301, 501));
         btDay = new QPushButton(centralWidget);
         btDay->setObjectName(QStringLiteral("btDay"));
         btDay->setGeometry(QRect(760, 0, 31, 181));
@@ -78,6 +83,9 @@ public:
         btCalendar = new QPushButton(centralWidget);
         btCalendar->setObjectName(QStringLiteral("btCalendar"));
         btCalendar->setGeometry(QRect(760, 360, 31, 181));
+        lSelDate = new QLabel(centralWidget);
+        lSelDate->setObjectName(QStringLiteral("lSelDate"));
+        lSelDate->setGeometry(QRect(125, 2, 291, 41));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -97,11 +105,12 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "IzzyTime", 0));
         btCurDate->setText(QApplication::translate("MainWindow", "Today", 0));
         btDay->setText(QApplication::translate("MainWindow", "D", 0));
         btWeek->setText(QApplication::translate("MainWindow", "W", 0));
         btCalendar->setText(QApplication::translate("MainWindow", "C", 0));
+        lSelDate->setText(QApplication::translate("MainWindow", "Selected Date", 0));
     } // retranslateUi
 
 };

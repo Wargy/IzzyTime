@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,8 +13,20 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>IzzyTime</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="btCurDate">
@@ -66,21 +81,21 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTableWidget" name="twTimeLine">
+   <widget class="QTableWidget" name="twTaskField">
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>20</y>
+      <y>40</y>
       <width>301</width>
       <height>501</height>
      </rect>
     </property>
    </widget>
-   <widget class="QTableWidget" name="twNotes">
+   <widget class="QTableWidget" name="twHangedTaskField">
     <property name="geometry">
      <rect>
-      <x>435</x>
-      <y>20</y>
+      <x>440</x>
+      <y>40</y>
       <width>301</width>
       <height>501</height>
      </rect>
@@ -123,6 +138,19 @@
     </property>
     <property name="text">
      <string>C</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lSelDate">
+    <property name="geometry">
+     <rect>
+      <x>125</x>
+      <y>2</y>
+      <width>291</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Selected Date</string>
     </property>
    </widget>
   </widget>
