@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     scroller.cpp \
-    dialog.cpp
+    dialog.cpp \
+    note.cpp
 
 HEADERS  += mainwindow.h \
     scroller.h \
-    dialog.h
+    dialog.h \
+    note.h
 
 FORMS    += mainwindow.ui \
     dialog.ui

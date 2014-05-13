@@ -12,3 +12,13 @@ Dialog::~Dialog()
 {
     delete ui;
 }
+
+QString Dialog::getTitle()
+{
+    return ui->edtTitle->text();
+}
+
+QString Dialog::getText()
+{
+    return ui->edtText->toPlainText();
+}

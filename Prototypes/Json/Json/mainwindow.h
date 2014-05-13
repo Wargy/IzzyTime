@@ -2,16 +2,20 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QList>
+#include <QLinkedList>
 #include <QFile>
 #include <QDate>
 #include <QTableWidget>
 #include <QTime>
+#include <QTimer>
+#include <QJsonObject>
+#include "note.h"
 
 #define PASTYEARS   -5
 #define FUTUREYEARS 6
 #define MONTHS      12
 #define HOURS       24
+#define PERIOD      60000   //ms
 
 namespace Ui {
 class MainWindow;
@@ -22,7 +26,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    struct Note
+ /*   struct Note
     {
         QDate   DateStart;
         QDate   DateEnd;
@@ -34,7 +38,7 @@ public:
         bool    Reminder;
         int     Color;
         char    Mask;
-    };
+    };*/
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -45,6 +49,13 @@ private slots:
     void on_twMonth_itemClicked(QTableWidgetItem *item);
     void on_twDay_itemClicked(QTableWidgetItem *item);
     void on_btCurDate_clicked();
+    void on_twTaskField_itemDoubleClicked(QTableWidgetItem *item);
+    bool isSelDatePresented();
+    void sendFile();
+    void readJsonObject(const QJsonObject json, Note &note);
+    void writeJsonObject(QJsonObject &json, Note note);
+    void loadFileJson();
+    void saveFileJson();
 
 private:
     void fillYearTable(QTableWidget& tableYear);
@@ -55,11 +66,12 @@ private:
     void fillHangedTaskField();
 
 private:
-    Ui::MainWindow *ui;
-    QList<Note>    TimeLine_;
-    QFile          fpjson_;
-    QDate          curDate;
-    QDate          selDate;
+    Ui::MainWindow      *ui;
+    QLinkedList<Note>    TimeLine_;
+    QFile                fpjson_;
+    QDate                curDate_;
+    QDate                selDate_;
+    QTimer              *timer_;
 };
 
 #endif // MAINWINDOW_H
