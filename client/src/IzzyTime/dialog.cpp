@@ -1,0 +1,24 @@
+#include "dialog.h"
+#include "ui_dialog.h"
+
+Dialog::Dialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Dialog)
+{
+    ui->setupUi(this);
+}
+
+Dialog::~Dialog()
+{
+    delete ui;
+}
+
+QString Dialog::getTitle()
+{
+    return ui->edtTitle->text();
+}
+
+QString Dialog::getText()
+{
+    return ui->edtText->toPlainText();
+}
