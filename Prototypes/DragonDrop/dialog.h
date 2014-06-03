@@ -14,6 +14,8 @@ class Dialog : public QDialog
 public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
+    QString getTitle();
+    QString getText();
 
 private:
     Ui::Dialog *ui;

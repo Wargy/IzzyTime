@@ -90,15 +90,13 @@
       <height>501</height>
      </rect>
     </property>
-    <property name="contextMenuPolicy">
-     <enum>Qt::CustomContextMenu</enum>
+    <property name="columnCount">
+     <number>1</number>
     </property>
-    <property name="dragDropMode">
-     <enum>QAbstractItemView::DragDrop</enum>
-    </property>
-    <property name="defaultDropAction">
-     <enum>Qt::CopyAction</enum>
-    </property>
+    <attribute name="horizontalHeaderMinimumSectionSize">
+     <number>29</number>
+    </attribute>
+    <column/>
    </widget>
    <widget class="QTableWidget" name="twHangedTaskField">
     <property name="geometry">

@@ -29,6 +29,19 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
+  <widget class="QLabel" name="lText">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>80</y>
+     <width>261</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Введите текст:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
   <widget class="QLineEdit" name="edtTitle">
    <property name="geometry">
     <rect>
@@ -36,16 +49,6 @@
      <y>40</y>
      <width>261</width>
      <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="edtText">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>100</y>
-     <width>261</width>
-     <height>171</height>
     </rect>
    </property>
   </widget>
@@ -62,17 +65,14 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Введите заголовок:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QLabel" name="lText">
+  <widget class="QTextEdit" name="edtText">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>80</y>
+     <y>100</y>
      <width>261</width>
-     <height>16</height>
+     <height>171</height>
     </rect>
-   </property>
-   <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Введите текст:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>

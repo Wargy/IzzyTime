@@ -1,6 +1,6 @@
 #include "draglabel.h"
 #include <QPainter>
-#include <QLineEdit>
+
 #include <QPalette>
 #include <QPushButton>
 #include <iostream>
@@ -11,7 +11,7 @@ DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CON
  {
 
      //QSize size = metric.size(Qt::TextSingleLine, text);
-     QSize size (210,60); //Изначально создаём стандартную форму 210 на 60, если меняем методом, жарим repaint
+     QSize size (210,40); //Изначально создаём стандартную форму 210 на 60, если меняем методом, жарим repaint
      QImage image(size.width(), size.height(),
                       QImage::Format_ARGB32_Premultiplied);
      image.fill(qRgba(0, 0, 0, 0));
@@ -43,21 +43,25 @@ DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CON
         setPixmap(QPixmap::fromImage(image));
         setMinimumWidth(210);
          setMinimumHeight(60);
-        QLineEdit *edit = new QLineEdit (this);
-       // edit->hide();
+     //   QLineEdit *edit = new QLineEdit (this);
+       in_edit = new  QLineEdit (this);
 
 
 
-        edit->setGeometry(size.width()*0.1,size.height()*0.45,size.width()*0.8,23);//x,y,width,height
-        edit->setStyleSheet("background:transparent");
 
-if (m_edit==true) edit->show(); else edit->hide();
-      // if(m_edit==true) edit->show();
+       in_edit->setGeometry(size.width()*0.1,size.height()*0.45,size.width()*0.8,23);//x,y,width,height
+
+
+         in_edit->setStyleSheet("background:transparent");
+if (m_edit==true) in_edit->show(); else in_edit->hide();
+    //    in_edit->setText("bla bla");
+        in_edit->show();
+
 
  //         QPixmap      pix("labla1.png");
          // setPixmap(pix);
 
-
+if(in_edit->text().length()>1) m_labelText=in_edit->text();
              m_labelText = text;
              m_size=size;
             m_color.setRed(200);

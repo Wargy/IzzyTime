@@ -3,7 +3,7 @@
 #include <QLabel>
 #include <QString>
 #include <QColor>
-
+#include <QLineEdit>
 
 class DragLabel : public QLabel
 {
@@ -25,12 +25,13 @@ public:
 
     //void keyPressEvent(QKeyEvent *event);
 
-
+      QLineEdit* in_edit;
 private:
     QString m_labelText;
     QSize m_size;
     QColor m_color;
     bool m_edit; //Состояние edit. Если m_edit TRUE то полоска ввода видна.
+
 
 };
 
