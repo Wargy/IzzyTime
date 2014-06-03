@@ -1,6 +1,6 @@
 #include "draglabel.h"
 #include <QPainter>
-#include <QLineEdit>
+
 #include <QPalette>
 #include <QPushButton>
 #include <iostream>
@@ -43,16 +43,15 @@ DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CON
         setPixmap(QPixmap::fromImage(image));
         setMinimumWidth(210);
          setMinimumHeight(60);
-        QLineEdit *edit = new QLineEdit (this);
-       // edit->hide();
+         in_edit = new  QLineEdit (this);
+
+         in_edit->setGeometry(size.width()*0.1,size.height()*0.45,size.width()*0.8,23);//x,y,width,height
 
 
+           in_edit->setStyleSheet("background:transparent");
+  if (m_edit==true) in_edit->show(); else in_edit->hide();
 
-        edit->setGeometry(size.width()*0.1,size.height()*0.45,size.width()*0.8,23);//x,y,width,height
-        edit->setStyleSheet("background:transparent");
-
-if (m_edit==true) edit->show(); else edit->hide();
-      // if(m_edit==true) edit->show();
+         //if(m_edit==true) edit->show();
 
  //         QPixmap      pix("labla1.png");
          // setPixmap(pix);

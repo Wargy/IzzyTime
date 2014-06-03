@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     start_x=450;
     start_y=60;
     dr_distance=70;
+    /*
     while (!inputStream.atEnd()) {
         QString word;
         word = inputStream.readLine();
@@ -76,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
           } //   if (!word.isEmpty()) {
      } //  while (!inputStream.atEnd())
 
-
+*/
      setAcceptDrops(true);
 }
 
@@ -232,6 +233,7 @@ void MainWindow::fillTaskField()
 {
     QTime time;
 
+
     //подготавливаем табличку для датированных записей
     ui->twTaskField->setColumnCount(2);
     ui->twTaskField->setColumnWidth(0, 51);
@@ -261,19 +263,42 @@ void MainWindow::fillTaskField()
             {
                 if(it->getDateStart() == selDate_)
                 {
-                    if(it->getTimeStart().toString() == "")
+                    if(it->getTimeStart().toString() == "") // если эта задача подвешенная
                     {
+                        //adding dragonDROP
+
                         ui->twHangedTaskField->setItem(rr, 0, new QTableWidgetItem(it->getTitle()
                                                                                   +" "
                                                                                   +it->getText()));
-                        rr++;
-                    }
+                         DragLabel* taskline = new DragLabel("",this);
+                         taskline->setText(it->getTitle()+" "+it->getText());
+
+                         int lab_y = ui->twHangedTaskField->y();
+                         int lab_x = ui->twHangedTaskField->x();
+                         QSize size=taskline->getSize();
+                         int task_height = size.height();
+                         taskline->setGeometry(QRect(lab_x,lab_y+rr*task_height,1,1));
+                         taskline->repaint();
+                         rr++;
+                    } // adding DRAGON DROP!
                     else
-                    {
+                    { //если задача привязана по времени
                         r = it->getTimeStart().hour();
                         ui->twTaskField->setItem(r, 1, new QTableWidgetItem(it->getTitle()
                                                                             +" "
                                                                             +it->getText()));
+                        DragLabel* taskline = new DragLabel("",this);
+                        taskline->setText(it->getTitle()+" "+it->getText());
+
+                        int lab_y = ui->twTaskField->y();
+                        int lab_x = ui->twTaskField->x();
+                        QSize size=taskline->getSize();
+                        int task_height = size.height();
+                        taskline->setGeometry(QRect(lab_x,lab_y+r*task_height,1,1));
+                        taskline->repaint();
+
+                        r++;
+                        //r -> номер строки
                     }
                 }
                 i++;

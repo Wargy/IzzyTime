@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QString>
 #include <QColor>
+#include <QLineEdit>
 
 
 class DragLabel : public QLabel
@@ -25,6 +26,7 @@ public:
 
     //void keyPressEvent(QKeyEvent *event);
 
+    QLineEdit* in_edit;
 
 private:
     QString m_labelText;
