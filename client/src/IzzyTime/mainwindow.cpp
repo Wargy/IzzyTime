@@ -11,7 +11,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include "note.h"
-#include <draglabel.h>
 #include <QSize>
 #include <QMouseEvent>
 #include <QMimeData>
@@ -19,23 +18,18 @@
 #include <QPalette>
 #include <iostream>
 #include <QFile>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
+
+#define table_space 55 //отступ слева от первой колонки таблицы задач со временем
 
 using namespace std;
+bool hideall=false;
+QLinkedList<DragLabel> draglist;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    changed_ = false; //никаких изменений еще нет
-
-    manager_ = new QNetworkAccessManager(this);
-
-    connect(manager_, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(slotFinished(QNetworkReply*)));
 
     curDate_ = QDate::currentDate();
     ui->btCurDate->setText("Today\n"+curDate_.toString());
@@ -48,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fillTaskField();
     standartStuffForAllTables(*ui->twTaskField);
+
+//    fillHangedTaskField();
     standartStuffForAllTables(*ui->twHangedTaskField);
 
     timer_ = new QTimer(this);
@@ -70,67 +66,13 @@ MainWindow::MainWindow(QWidget *parent) :
     start_x=450;
     start_y=60;
     dr_distance=70;
-    /*
-    while (!inputStream.atEnd()) {
-        QString word;
-        word = inputStream.readLine();
 
-          if (!word.isEmpty()) {
-        DragLabel *wordLabel = new DragLabel(word, this);
-    wordLabel->move(start_x, start_y);
-    wordLabel->show();
-    wordLabel->setAttribute(Qt::WA_DeleteOnClose);
-    start_y+=dr_distance;
-          } //   if (!word.isEmpty()) {
-     } //  while (!inputStream.atEnd())
-
-*/
      setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-
-
-void MainWindow::slotFinished(QNetworkReply* reply)
-{
-    if(reply->error() != QNetworkReply::NoError)
-    {
-        QMessageBox::critical(0,
-                              tr("Error"),
-                              tr("An error while download is occured"));
-    }
-    else
-    {
-        //перезаписываем файл - теперь все записи сохранены
-        QLinkedList<Note>::iterator it;
-        for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
-        {
-            if(it->getStatus() == false)
-                it->setStatus(true);
-        }
-        saveFileJson();
-    }
-
-    reply->deleteLater();
-}
-
-void MainWindow::sync(QByteArray data)
-{
-    /*QUrl url("link!");
-    QNetworkRequest request(url);
-
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-//    QJsonDocument doc(json);
-//    QByteArray data(doc.toJson());
-
-    qDebug() << "Sync" << QString::fromUtf8(data.data(), data.size());
-
-    manager_->post(request, data);*/
 }
 
 
@@ -232,8 +174,13 @@ void MainWindow::on_twMonth_itemClicked(QTableWidgetItem *item)
     fillTaskField();
 }
 
-void MainWindow::on_twDay_itemClicked(QTableWidgetItem *item)
+void MainWindow::on_twDay_itemClicked(QTableWidgetItem *item) // Функция заполнения дня
 {
+    hideall=true;
+   //clearDragon(draglist);
+   // MainWindow::
+
+    cout<<"clear Drag ok!"<<endl;
     for(int i = 0; i < ui->twDay->rowCount(); i++)
         if(ui->twDay->item(i, 0)->isSelected())
             ui->twDay->item(i, 0)->setSelected(false);
@@ -246,6 +193,7 @@ void MainWindow::on_twDay_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_btCurDate_clicked()
 {
+
     selDate_ = curDate_;
     ui->lSelDate->setText(selDate_.toString());
 
@@ -279,6 +227,7 @@ void MainWindow::on_btCurDate_clicked()
 void MainWindow::fillTaskField()
 {
     QTime time;
+
 
     //подготавливаем табличку для датированных записей
     ui->twTaskField->setColumnCount(2);
@@ -316,36 +265,41 @@ void MainWindow::fillTaskField()
                         ui->twHangedTaskField->setItem(rr, 0, new QTableWidgetItem(it->getTitle()
                                                                                   +" "
                                                                                   +it->getText()));
-                         DragLabel* taskline = new DragLabel("",this);
+                         DragLabel* taskline = new DragLabel("",this,true);
                          taskline->setText(it->getTitle()+" "+it->getText());
 
                          int lab_y = ui->twHangedTaskField->y();
                          int lab_x = ui->twHangedTaskField->x();
                          QSize size=taskline->getSize();
                          int task_height = size.height();
-                         taskline->setGeometry(QRect(lab_x,lab_y+rr*task_height,1,1));
+                         taskline->setGeometry(QRect(lab_x+table_space/2,lab_y+rr*task_height,1,1));
                          taskline->repaint();
+                         if (hideall==true) taskline->hide();
+                         draglist.push_back(*taskline);
+                       //  taskline= draglist.first();
                          rr++;
-                    } // adding DRAGON DROP!
+                    }
                     else
                     { //если задача привязана по времени
                         r = it->getTimeStart().hour();
                         ui->twTaskField->setItem(r, 1, new QTableWidgetItem(it->getTitle()
                                                                             +" "
                                                                             +it->getText()));
-                        DragLabel* taskline = new DragLabel("",this);
+                        DragLabel* taskline = new DragLabel("",this,true);
                         taskline->setText(it->getTitle()+" "+it->getText());
 
                         int lab_y = ui->twTaskField->y();
                         int lab_x = ui->twTaskField->x();
                         QSize size=taskline->getSize();
                         int task_height = size.height();
-                        taskline->setGeometry(QRect(lab_x,lab_y+r*task_height,1,1));
+                        taskline->setGeometry(QRect(lab_x+table_space,lab_y+r*task_height,1,1));
                         taskline->repaint();
+                        if (hideall==true) taskline->hide();
+                        draglist.append(*taskline);
 
                         r++;
                         //r -> номер строки
-                    }
+                    }// Конец вставки Dragon Dropa!
                 }
                 i++;
             }
@@ -353,13 +307,12 @@ void MainWindow::fillTaskField()
     }
 }
 
-void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
+void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item) // Создание диалогового окна
 {
     Dialog *dialog = new Dialog(this);
     Note note;
     if(dialog->exec() == QDialog::Accepted)
     {
-        note.setStatus(false); //т.к. еще не сохранена
         note.setTitle(dialog->getTitle());
         note.setText(dialog->getText());
         note.setDateStart(selDate_);
@@ -367,17 +320,30 @@ void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
         note.setTimeStart(QTime::fromString(item->text()));
         note.setTimeEnd(QTime::fromString(item->text()));
 
-        qDebug() << note.getStatus();
-        qDebug() << note.getTitle();
-        qDebug() << note.getText();
-        qDebug() << note.getDateStart();
-        qDebug() << note.getDateEnd();
-        qDebug() << note.getTimeStart();
-        qDebug() << note.getTimeEnd();
+//        qDebug() << note.getTitle();
+//        qDebug() << note.getText();
+//        qDebug() << note.getDateStart();
+//        qDebug() << note.getDateEnd();
+//        qDebug() << note.getTimeStart();
+//        qDebug() << note.getTimeEnd();
 
         ui->twTaskField->setItem(item->row(), 1, new QTableWidgetItem(dialog->getTitle()
                                                                       +" "
-                                                                      +dialog->getText()));
+                                                                     +dialog->getText()));
+       //Добавлено Казанцевым  4.06.14 в 12:10  - Создание драгндропа вместо текстовой записи
+        DragLabel* taskline = new DragLabel("",this,true);
+        taskline->setText(dialog->getTitle()+" "+dialog->getText());
+        int lab_y = ui->twTaskField->y();
+        int lab_x = ui->twTaskField->x();
+        QSize size=taskline->getSize();
+        int task_height = size.height();
+        taskline->setGeometry(QRect(lab_x+table_space,lab_y+item->row()*30,1,1));
+        taskline->repaint();
+        taskline->show();
+        if (hideall==true) taskline->hide();
+         draglist.push_back(*taskline);
+        //----
+
         //и записываем в контейнер:
         if(TimeLine_.size() != 0)
         {
@@ -401,8 +367,7 @@ void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
         else
             TimeLine_.append(note);
     }
-    //saveFileJson(); //<--- temp
-    changed_ = true;
+    saveFileJson(); //<--- temp
 }
 
 void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
@@ -411,19 +376,17 @@ void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
     Note note;
     if(dialog->exec() == QDialog::Accepted)
     {
-        note.setStatus(false); //т.к. еще не сохранена
         note.setTitle(dialog->getTitle());
         note.setText(dialog->getText());
         note.setDateStart(selDate_);
         note.setDateEnd(selDate_);
 
-        qDebug() << note.getStatus();
-        qDebug() << note.getTitle();
-        qDebug() << note.getText();
-        qDebug() << note.getDateStart();
-        qDebug() << note.getDateEnd();
-        qDebug() << note.getTimeStart();
-        qDebug() << note.getTimeEnd();
+//        qDebug() << note.getTitle();
+//        qDebug() << note.getText();
+//        qDebug() << note.getDateStart();
+//        qDebug() << note.getDateEnd();
+//        qDebug() << note.getTimeStart();
+//        qDebug() << note.getTimeEnd();
 
         ui->twHangedTaskField->setItem(row, column, new QTableWidgetItem(dialog->getTitle()
                                                                          +" "
@@ -451,8 +414,7 @@ void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
         else
             TimeLine_.append(note);
     }
-    //saveFileJson(); //<--- temp
-    changed_ = true;
+    saveFileJson(); //<--- temp
 }
 
 bool MainWindow::isSelDatePresented()
@@ -477,29 +439,7 @@ void MainWindow::sendFile()
                              "That's all. Really.",
                              QMessageBox::Ok);
     //тут запись в файл и отправка на сервер
-    if(changed_)
-    {
-        //сохраняем в локальном файле...
-        //(да, в "несохраненном" виде - на случай отсутствия сети)
-        saveFileJson();
-
-        fpjson_.setFileName("data.json");
-        if(!fpjson_.open(QIODevice::ReadOnly))
-        {
-            QMessageBox::warning(this,
-                                 "Внимание!",
-                                 "Не удалось открыть файл json",
-                                 QMessageBox::Ok);\
-            return;
-        }
-        QByteArray data = fpjson_.readAll(); //читаем весь массив
-        fpjson_.close();
-
-        //... и отправляем на сервер
-        sync(data);
-
-        changed_ = false;
-    }
+    //saveFileJson();
     //...
 }
 
@@ -508,7 +448,6 @@ void MainWindow::sendFile()
 //----- собственно, работа с json: -----
 void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 {
-    note.setStatus(json["saved"].toBool());
     note.setDateStart(QDate::fromString(json["DateStart"].toString()));
     note.setDateEnd(QDate::fromString(json["DateEnd"].toString()));
     note.setTimeStart(QTime::fromString(json["TimeStart"].toString()));
@@ -520,18 +459,16 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 //    item.Color
 //    item.Mask
 
-    qDebug() << note.getStatus();
-    qDebug() << note.getTitle();
-    qDebug() << note.getText();
-    qDebug() << note.getDateStart();
-    qDebug() << note.getDateEnd();
-    qDebug() << note.getTimeStart();
-    qDebug() << note.getTimeEnd();
+//    qDebug() << note.getTitle();
+//    qDebug() << note.getText();
+//    qDebug() << note.getDateStart();
+//    qDebug() << note.getDateEnd();
+//    qDebug() << note.getTimeStart();
+//    qDebug() << note.getTimeEnd();
 }
 
 void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 {
-    json["saved"]     = note.getStatus();
     json["DateStart"] = note.getDateStart().toString();
     json["DateEnd"]   = note.getDateEnd().toString();
     json["TimeStart"] = note.getTimeStart().toString();
@@ -597,23 +534,26 @@ void MainWindow::saveFileJson()
 
 
 //DRAGON DROP!!!!
-void MainWindow::mousePressEvent(QMouseEvent *event)
+void MainWindow::mousePressEvent(QMouseEvent *event) // Реакция на нажатие мыши в области объекта
 {
     DragLabel *child = static_cast<DragLabel*>(childAt(event->pos())); //указатель на объект, который находится в ивенте
+ draglist.push_back(*child);
     if (!child)
         return;
 
 ;
+    if (hideall==true) child->hide();
+    // Изменение содержимого облачка. Если в строке ввода есть текст, заменить текст облака на вводный
+    if (child->in_edit->text().length()>1)  { child->setText(child->in_edit->text()); }
+    if (child->getEdit()==true) child->setEdit(false); else child->setEdit(true);
+    // Сокрытие/отображение лайнедита после клика
+
     QPoint hotSpot = event->pos() - child->pos();//расположение ивента - расположение объекта,
-
-
-
-
     QByteArray itemData;
     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
 
-    dataStream << child->getText() << QPoint(hotSpot); //Походу даже вытаскивает из потока данных! Нужно как то извратиться и создать поток цветов!
-
+    //Передаём в поток данных текст объекта, его координату и состояние лайнедита
+    dataStream << child->getText() << QPoint(hotSpot) << child->getEdit() ;
     QMimeData *mimeData = new QMimeData;
        mimeData->setData("application/x-fridgemagnet", itemData);
        mimeData->setText(child->getText());
@@ -622,7 +562,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
            drag->setMimeData(mimeData);
            drag->setPixmap(*child->pixmap());
            drag->setHotSpot(hotSpot);
-
            child->hide();
            child->setEdit(true);
 
@@ -680,29 +619,29 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event) //dragmove - пока в �
 
 }
 
-void MainWindow::dropEvent(QDropEvent *event) //Drop event, метод отпускания объекта?
+void MainWindow::dropEvent(QDropEvent *event) //Drop event, метод описывающий отпускание объекта
  {
      if (event->mimeData()->hasFormat("application/x-fridgemagnet")) {
          const QMimeData *mime = event->mimeData();
-
-         //
 
          QByteArray itemData = mime->data("application/x-fridgemagnet");
                 QDataStream dataStream(&itemData, QIODevice::ReadOnly); //считывает инфо о наших магнитах из потока и пересоздаёт их
 
                 QString text;
                 QPoint offset;
-                dataStream >> text >> offset;
 
-                //
-                DragLabel *newLabel = new DragLabel(text, this);
+                bool edit;
+                dataStream >>text >> offset >> edit;
+
+                DragLabel *newLabel = new DragLabel(text, this,edit);
                          newLabel->move(event->pos() - offset);
                         //отображает при двух кликах, можно делать паузу между кликами или тыкать что угодно
 
 
                          newLabel->show();
+                         if (hideall==true) newLabel->hide();
                          newLabel->setAttribute(Qt::WA_DeleteOnClose);
-
+                             draglist.push_back(*newLabel);
                          if (event->source() == this) {
                              event->setDropAction(Qt::MoveAction);
                              event->accept();
@@ -716,10 +655,12 @@ void MainWindow::dropEvent(QDropEvent *event) //Drop event, метод отпу�
              QPoint position = event->pos();
 
              foreach (QString piece, pieces) {
-                 DragLabel *newLabel = new DragLabel(piece, this);
+                 DragLabel *newLabel = new DragLabel(piece, this,true);
                  newLabel->move(position);
 
                  newLabel->show();
+                 if (hideall==true) newLabel->hide();
+                  draglist.push_back(*newLabel);
                  newLabel->setAttribute(Qt::WA_DeleteOnClose);
 
                  position += QPoint(newLabel->width(), 0);
@@ -731,6 +672,20 @@ void MainWindow::dropEvent(QDropEvent *event) //Drop event, метод отпу�
          }
      }
 
+void MainWindow::clearDragon(QLinkedList<DragLabel> dr_list)
+{
+ QLinkedList<DragLabel>::iterator it;
 
+ DragLabel tst =dr_list.takeFirst();
+
+ cout<<"TST="<<tst.getText().toStdString()<<endl;
+ tst.setText("1111111");
+ tst.repaint();
+ tst.show();
+// dr_list.removeFirst();
+ // delete(&it);
+ //dr_list.clear();
+
+}
 
 //DRAGON DROP!!!

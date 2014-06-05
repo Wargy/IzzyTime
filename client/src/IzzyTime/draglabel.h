@@ -9,7 +9,8 @@
 class DragLabel : public QLabel
 {
 public:
-    DragLabel(const QString &text, QWidget *parent);
+    DragLabel(const QString &text, QWidget *parent, bool edit);
+    DragLabel(const DragLabel& obj);
     void repaint();
 
     void setSize(QSize size);

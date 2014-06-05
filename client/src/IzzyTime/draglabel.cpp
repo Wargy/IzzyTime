@@ -5,13 +5,21 @@
 #include <QPushButton>
 #include <iostream>
 //#include <QKeyEvent>
+
+#define dr_width 210 // Ширина и высота облака по умолчанию
+#define dr_height 40
+
+#define min_width 210
+#define min_height 40
+
+
 using namespace std;
-DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CONSTRUCTOR ****
+DragLabel::DragLabel(const QString &text, QWidget *parent, bool edit) //CONSTRUCTOR *** CONSTRUCTOR ****
      : QLabel(parent)
  {
 
      //QSize size = metric.size(Qt::TextSingleLine, text);
-     QSize size (210,60); //Изначально создаём стандартную форму 210 на 60, если меняем методом, жарим repaint
+     QSize size (dr_width,dr_height); //Изначально создаём стандартную форму 210 на 60, если меняем методом, жарим repaint
      QImage image(size.width(), size.height(),
                       QImage::Format_ARGB32_Premultiplied);
      image.fill(qRgba(0, 0, 0, 0));
@@ -41,21 +49,20 @@ DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CON
          painter.end();
          //загрузка картинки image, которую мы нарисовали
         setPixmap(QPixmap::fromImage(image));
-        setMinimumWidth(210);
-         setMinimumHeight(60);
+        setMinimumWidth(min_width);
+         setMinimumHeight(min_height);
          in_edit = new  QLineEdit (this);
 
          in_edit->setGeometry(size.width()*0.1,size.height()*0.45,size.width()*0.8,23);//x,y,width,height
 
 
            in_edit->setStyleSheet("background:transparent");
-  if (m_edit==true) in_edit->show(); else in_edit->hide();
 
-         //if(m_edit==true) edit->show();
+    m_edit=edit;
+         if(m_edit==true)  {  in_edit->show(); } else  { in_edit->hide(); }
 
  //         QPixmap      pix("labla1.png");
          // setPixmap(pix);
-
 
              m_labelText = text;
              m_size=size;
@@ -65,17 +72,22 @@ DragLabel::DragLabel(const QString &text, QWidget *parent) //CONSTRUCTOR *** CON
 
     }
 
+DragLabel::DragLabel(const DragLabel& obj)
+{
+ m_labelText=obj.getText();
+ m_size=obj.getSize();
+ m_color=obj.getColor();
+ m_edit=obj.getEdit();
+}
+
+
 
 // Изменение формы задачи по ходу выполнения программы ******* REPAINT  REPAINT REPAINT ******
 void DragLabel::repaint()
 {
-
-
     QImage image(m_size.width(),m_size.height(),
                       QImage::Format_ARGB32_Premultiplied);
     image.fill(qRgba(0,0,0,0));
-
-
 
     QLinearGradient gradient(0, 0, 0, image.height()-1);
         gradient.setColorAt(0.0, Qt::transparent);
@@ -106,7 +118,6 @@ void DragLabel::repaint()
 
 
     setPixmap(QPixmap::fromImage(image));
-
 
 
 
