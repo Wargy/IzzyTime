@@ -10,6 +10,8 @@ class Note
 public:
     Note();
 
+    bool getStatus() { return saved; }
+
     QDate getDateStart() { return DateStart; }
 
     QDate getDateEnd() { return DateEnd; }
@@ -30,6 +32,8 @@ public:
 
     char getMask() { return Mask; }*/
 
+    void setStatus(bool pStatus) { saved = pStatus; }
+
     void setDateStart(QDate pDateStart) { DateStart = pDateStart; }
 
     void setDateEnd(QDate pDateEnd) { DateEnd = pDateEnd; }
@@ -43,6 +47,7 @@ public:
     void setText(QString pText) { Text = pText; }
 
 private:
+    bool    saved;
     QDate   DateStart;
     QDate   DateEnd;
     QTime   TimeStart;
