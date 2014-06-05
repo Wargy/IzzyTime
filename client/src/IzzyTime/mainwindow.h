@@ -9,6 +9,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QJsonObject>
+#include <QNetworkAccessManager>
 #include "note.h"
 
 #define PASTYEARS   -5
@@ -26,23 +27,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
- /*   struct Note
-    {
-        QDate   DateStart;
-        QDate   DateEnd;
-        QTime   TimeStart;
-        QTime   TimeEnd;
-        QString Title;
-        QString Text;
-        bool    Priority;
-        bool    Reminder;
-        int     Color;
-        char    Mask;
-    };*/
-
-public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+public slots:
+    void slotFinished(QNetworkReply*);
 
 private slots:
     void on_twYear_itemClicked(QTableWidgetItem *item);
@@ -57,6 +46,7 @@ private slots:
     void writeJsonObject(QJsonObject &json, Note note);
     void loadFileJson();
     void saveFileJson();
+    void sync(QJsonObject &json);
 
 private:
     void fillYearTable(QTableWidget& tableYear);
@@ -64,7 +54,6 @@ private:
     void fillDayTable(QTableWidget& tableDay, int daysInMonth);
     void standartStuffForAllTables(QTableWidget& table);
     void fillTaskField();
-//    void fillHangedTaskField();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -73,12 +62,14 @@ protected:
     void mousePressEvent(QMouseEvent *event);
 
 private:
-    Ui::MainWindow      *ui;
-    QLinkedList<Note>    TimeLine_;
-    QFile                fpjson_;
-    QDate                curDate_;
-    QDate                selDate_;
-    QTimer              *timer_;
+    Ui::MainWindow*        ui;
+    QLinkedList<Note>      TimeLine_;
+    QFile                  fpjson_;
+    QDate                  curDate_;
+    QDate                  selDate_;
+    QTimer*                timer_;
+    QNetworkAccessManager* manager_;
+    bool                   changed_;
 };
 
 #endif // MAINWINDOW_H

@@ -19,6 +19,8 @@
 #include <QPalette>
 #include <iostream>
 #include <QFile>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 using namespace std;
 
@@ -27,6 +29,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    changed_ = false; //никаких изменений еще нет
+
+    manager_ = new QNetworkAccessManager(this);
+
+    connect(manager_, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(slotFinished(QNetworkReply*)));
 
     curDate_ = QDate::currentDate();
     ui->btCurDate->setText("Today\n"+curDate_.toString());
@@ -39,8 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fillTaskField();
     standartStuffForAllTables(*ui->twTaskField);
-
-//    fillHangedTaskField();
     standartStuffForAllTables(*ui->twHangedTaskField);
 
     timer_ = new QTimer(this);
@@ -84,6 +91,35 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+
+void MainWindow::slotFinished(QNetworkReply* reply)
+{
+    if(reply->error() != QNetworkReply::NoError)
+    {
+        QMessageBox::critical(0,
+                              tr("Error"),
+                              tr("An error while download is occured"));
+    }
+
+    reply->deleteLater();
+}
+
+void MainWindow::sync(QJsonObject &json)
+{
+    /*QUrl url("link!");
+    QNetworkRequest request(url);
+
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonDocument doc(json);
+    QByteArray data(doc.toJson());
+
+    qDebug() << "Sync" << QString::fromUtf8(data.data(), data.size());
+
+    manager_->post(request, data);*/
 }
 
 
@@ -233,7 +269,6 @@ void MainWindow::fillTaskField()
 {
     QTime time;
 
-
     //подготавливаем табличку для датированных записей
     ui->twTaskField->setColumnCount(2);
     ui->twTaskField->setColumnWidth(0, 51);
@@ -313,6 +348,7 @@ void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
     Note note;
     if(dialog->exec() == QDialog::Accepted)
     {
+        note.setStatus(false); //т.к. еще не сохранена
         note.setTitle(dialog->getTitle());
         note.setText(dialog->getText());
         note.setDateStart(selDate_);
@@ -320,6 +356,7 @@ void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
         note.setTimeStart(QTime::fromString(item->text()));
         note.setTimeEnd(QTime::fromString(item->text()));
 
+        qDebug() << note.getStatus();
         qDebug() << note.getTitle();
         qDebug() << note.getText();
         qDebug() << note.getDateStart();
@@ -353,7 +390,8 @@ void MainWindow::on_twTaskField_itemDoubleClicked(QTableWidgetItem *item)
         else
             TimeLine_.append(note);
     }
-    saveFileJson(); //<--- temp
+    //saveFileJson(); //<--- temp
+    changed_ = true;
 }
 
 void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
@@ -362,11 +400,13 @@ void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
     Note note;
     if(dialog->exec() == QDialog::Accepted)
     {
+        note.setStatus(false); //т.к. еще не сохранена
         note.setTitle(dialog->getTitle());
         note.setText(dialog->getText());
         note.setDateStart(selDate_);
         note.setDateEnd(selDate_);
 
+        qDebug() << note.getStatus();
         qDebug() << note.getTitle();
         qDebug() << note.getText();
         qDebug() << note.getDateStart();
@@ -400,7 +440,8 @@ void MainWindow::on_twHangedTaskField_cellDoubleClicked(int row, int column)
         else
             TimeLine_.append(note);
     }
-    saveFileJson(); //<--- temp
+    //saveFileJson(); //<--- temp
+    changed_ = true;
 }
 
 bool MainWindow::isSelDatePresented()
@@ -425,7 +466,14 @@ void MainWindow::sendFile()
                              "That's all. Really.",
                              QMessageBox::Ok);
     //тут запись в файл и отправка на сервер
-    //saveFileJson();
+    if(changed_)
+    {
+        //отправляем на сервер...
+        //...
+        //...и сохраняем в локальном файле
+        saveFileJson();
+        changed_ = false;
+    }
     //...
 }
 
@@ -434,6 +482,7 @@ void MainWindow::sendFile()
 //----- собственно, работа с json: -----
 void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 {
+    note.setStatus(true); //поле статуса 1, т.к. запись найдена в файле
     note.setDateStart(QDate::fromString(json["DateStart"].toString()));
     note.setDateEnd(QDate::fromString(json["DateEnd"].toString()));
     note.setTimeStart(QTime::fromString(json["TimeStart"].toString()));
@@ -445,6 +494,7 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 //    item.Color
 //    item.Mask
 
+    qDebug() << note.getStatus();
     qDebug() << note.getTitle();
     qDebug() << note.getText();
     qDebug() << note.getDateStart();
@@ -455,6 +505,7 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 
 void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 {
+    //здесь поле статса не участвует! оно нужно только локально!
     json["DateStart"] = note.getDateStart().toString();
     json["DateEnd"]   = note.getDateEnd().toString();
     json["TimeStart"] = note.getTimeStart().toString();
@@ -506,8 +557,13 @@ void MainWindow::saveFileJson()
     QLinkedList<Note>::iterator it;
     for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
     {
-        writeJsonObject(json, *it);
-        jarr.append(json);
+        if(it->getStatus() == false)
+        {
+            writeJsonObject(json, *it);
+            jarr.append(json);
+            it->setStatus(true); //записали.
+            sync(json); //отправили. отправили?
+        }
     }
     QJsonObject jobj;
     jobj["TimeLine"] = jarr;
