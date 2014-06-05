@@ -103,19 +103,30 @@ void MainWindow::slotFinished(QNetworkReply* reply)
                               tr("Error"),
                               tr("An error while download is occured"));
     }
+    else
+    {
+        //перезаписываем файл - теперь все записи сохранены
+        QLinkedList<Note>::iterator it;
+        for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
+        {
+            if(it->getStatus() == false)
+                it->setStatus(true);
+        }
+        saveFileJson();
+    }
 
     reply->deleteLater();
 }
 
-void MainWindow::sync(QJsonObject &json)
+void MainWindow::sync(QByteArray data)
 {
     /*QUrl url("link!");
     QNetworkRequest request(url);
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QJsonDocument doc(json);
-    QByteArray data(doc.toJson());
+//    QJsonDocument doc(json);
+//    QByteArray data(doc.toJson());
 
     qDebug() << "Sync" << QString::fromUtf8(data.data(), data.size());
 
@@ -449,9 +460,9 @@ bool MainWindow::isSelDatePresented()
     QLinkedList<Note>::iterator it;
     for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
     {
-        qDebug() << it->getDateStart();
-        qDebug() << selDate_;
-        qDebug() << (it->getDateStart() == selDate_);
+//        qDebug() << it->getDateStart();
+//        qDebug() << selDate_;
+//        qDebug() << (it->getDateStart() == selDate_);
         if(it->getDateStart() == selDate_)
             return true;
     }
@@ -468,10 +479,25 @@ void MainWindow::sendFile()
     //тут запись в файл и отправка на сервер
     if(changed_)
     {
-        //отправляем на сервер...
-        //...
-        //...и сохраняем в локальном файле
+        //сохраняем в локальном файле...
+        //(да, в "несохраненном" виде - на случай отсутствия сети)
         saveFileJson();
+
+        fpjson_.setFileName("data.json");
+        if(!fpjson_.open(QIODevice::ReadOnly))
+        {
+            QMessageBox::warning(this,
+                                 "Внимание!",
+                                 "Не удалось открыть файл json",
+                                 QMessageBox::Ok);\
+            return;
+        }
+        QByteArray data = fpjson_.readAll(); //читаем весь массив
+        fpjson_.close();
+
+        //... и отправляем на сервер
+        sync(data);
+
         changed_ = false;
     }
     //...
@@ -482,7 +508,7 @@ void MainWindow::sendFile()
 //----- собственно, работа с json: -----
 void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 {
-    note.setStatus(true); //поле статуса 1, т.к. запись найдена в файле
+    note.setStatus(json["saved"].toBool());
     note.setDateStart(QDate::fromString(json["DateStart"].toString()));
     note.setDateEnd(QDate::fromString(json["DateEnd"].toString()));
     note.setTimeStart(QTime::fromString(json["TimeStart"].toString()));
@@ -505,7 +531,7 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 
 void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 {
-    //здесь поле статса не участвует! оно нужно только локально!
+    json["saved"]     = note.getStatus();
     json["DateStart"] = note.getDateStart().toString();
     json["DateEnd"]   = note.getDateEnd().toString();
     json["TimeStart"] = note.getTimeStart().toString();
@@ -557,13 +583,8 @@ void MainWindow::saveFileJson()
     QLinkedList<Note>::iterator it;
     for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
     {
-        if(it->getStatus() == false)
-        {
-            writeJsonObject(json, *it);
-            jarr.append(json);
-            it->setStatus(true); //записали.
-            sync(json); //отправили. отправили?
-        }
+        writeJsonObject(json, *it);
+        jarr.append(json);
     }
     QJsonObject jobj;
     jobj["TimeLine"] = jarr;

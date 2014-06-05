@@ -46,7 +46,7 @@ private slots:
     void writeJsonObject(QJsonObject &json, Note note);
     void loadFileJson();
     void saveFileJson();
-    void sync(QJsonObject &json);
+    void sync(QByteArray data);
 
 private:
     void fillYearTable(QTableWidget& tableYear);
