@@ -13,11 +13,11 @@ module.exports = function (app) {
 //            return;
 //        }
         if (req.is('*/json')) {
-            var body = req.body;
+            var body = JSON.parse(req.body);
 
-            for (i = 0; i < body.length; i++) {
+            for (i = 0; i < body['TimeLine'].length; i++) {
 
-            if (body[i].saved == 0) {
+            if (body['TimeLine'][i].saved == 0) {
                 db.update(body[i]);
             }
         }

@@ -2,8 +2,7 @@
     "app": {
         "host": "localhost",
         "port": 8081,
-        "schema": "http",
-        "url": "http://domain.tld"
+        "schema": "http"
     },
 
     "session": {
