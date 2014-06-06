@@ -16,8 +16,6 @@ module.exports = function (app) {
         sessionOptions.store = new MemcachedStore(config.get("memcached"));
     }
 
-    //if behind a reverse proxy such as Varnish or Nginx
-    //app.enable('trust proxy');
     app.use(express.logger('dev'));
     app.use(express.static(path.join(__dirname + "/..", 'public')));
     app.use(express.json());

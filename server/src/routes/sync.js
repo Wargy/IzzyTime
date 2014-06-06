@@ -1,13 +1,7 @@
 /**
  * Created by marinaefimova on 25.04.14.
  */
-//var pool = require('pool');
-var jsonObject={
-    Name: 'Marina',
-    Age: 21,
-    Detail: 'This is example'
-}
-var sql;
+
 var db=require('./database');
 
 module.exports = function (app) {
@@ -21,17 +15,8 @@ module.exports = function (app) {
         if (req.is('*/json')) {
             var body = req.body;
 
-//            console.log(body);
-//            sql='update test set name=marina value=efimova;';
-//pool.query(sql,function(err, rows, fields) {
-//                if (err) throw err;
-//
-//               // console.log('The solution is: ', rows[0].solution);});
-//});
-            // var record=JSON.parse(body);
-            //   var json=JSON.stringify(body);
             for (i = 0; i < body.length; i++) {
-               // console.log(body[i]);
+
             if (body[i].saved == 0) {
                 db.update(body[i]);
             }
@@ -39,10 +24,5 @@ module.exports = function (app) {
             return;
         }
 
-
-
-//        res.render('auth', {
-//            error: req.flash('error')
-//        });
     });
 }
