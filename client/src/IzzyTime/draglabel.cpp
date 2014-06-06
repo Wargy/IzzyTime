@@ -69,7 +69,9 @@ DragLabel::DragLabel(const QString &text, QWidget *parent, bool edit) //CONSTRUC
             m_color.setRed(200);
             m_color.setGreen(30);
             m_color.setBlue(100);
-
+// Добавлено Казанцевым Тёмной страшной ночью
+            m_col=-1;
+            m_row=-1;
     }
 
 DragLabel::DragLabel(const DragLabel& obj)
@@ -166,3 +168,23 @@ bool DragLabel::getEdit() const
     return (m_edit);
 }
 
+// Добавлено темной страшной ночью
+void DragLabel::setRow(int row)
+{
+    m_row=row;
+}
+
+int DragLabel::getRow()
+{
+    return(m_row);
+}
+
+void DragLabel::setCol(int col)
+{
+    m_col=col;
+}
+
+int DragLabel::getCol()
+{
+    return(m_col);
+}

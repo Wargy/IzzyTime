@@ -25,6 +25,11 @@ public:
     void setEdit(bool edit);
     bool getEdit() const;
 
+    void setRow(int row);
+    int getRow();
+
+    void setCol(int col);
+    int getCol();
     //void keyPressEvent(QKeyEvent *event);
 
     QLineEdit* in_edit;
@@ -34,6 +39,8 @@ private:
     QSize m_size;
     QColor m_color;
     bool m_edit; //Состояние edit. Если m_edit TRUE то полоска ввода видна.
+    int m_row;
+    int m_col;
 
 };
 

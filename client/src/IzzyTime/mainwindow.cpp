@@ -56,12 +56,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     int start_x,start_y=0; //Начальная координата на экране форм Drag_n_drop
     int dr_distance=0; //Расстояние между формами при подгрузке их из файла
-    if (QFile::exists("dictionary/words.txt")==false) cout<<"FILE NOT DETECTED!"<<endl;
-    QFile dictionaryFile("dictionary/words.txt");
+   // if (QFile::exists("dictionary/words.txt")==false) cout<<"FILE NOT DETECTED!"<<endl;
+   // QFile dictionaryFile("dictionary/words.txt");
 
-    dictionaryFile.open(QFile::ReadOnly);
+    //dictionaryFile.open(QFile::ReadOnly);
 
-    QTextStream inputStream(&dictionaryFile);
+    //QTextStream inputStream(&dictionaryFile);
 
     start_x=450;
     start_y=60;
@@ -180,7 +180,7 @@ void MainWindow::on_twDay_itemClicked(QTableWidgetItem *item) // Функция 
    //clearDragon(draglist);
    // MainWindow::
 
-    cout<<"clear Drag ok!"<<endl;
+
     for(int i = 0; i < ui->twDay->rowCount(); i++)
         if(ui->twDay->item(i, 0)->isSelected())
             ui->twDay->item(i, 0)->setSelected(false);
@@ -267,13 +267,18 @@ void MainWindow::fillTaskField()
                                                                                   +it->getText()));
                          DragLabel* taskline = new DragLabel("",this,true);
                          taskline->setText(it->getTitle()+" "+it->getText());
+                        // Этот кусок добавлен Варгушей поздно ночью
+                         taskline->setRow(rr);
+                         taskline->setCol(1);
 
+                        //
                          int lab_y = ui->twHangedTaskField->y();
                          int lab_x = ui->twHangedTaskField->x();
                          QSize size=taskline->getSize();
                          int task_height = size.height();
                          taskline->setGeometry(QRect(lab_x+table_space/2,lab_y+rr*task_height,1,1));
                          taskline->repaint();
+                      // int rw=
                          if (hideall==true) taskline->hide();
                          draglist.push_back(*taskline);
                        //  taskline= draglist.first();
@@ -287,6 +292,10 @@ void MainWindow::fillTaskField()
                                                                             +it->getText()));
                         DragLabel* taskline = new DragLabel("",this,true);
                         taskline->setText(it->getTitle()+" "+it->getText());
+                        // Этот кусок добавлен Варгушей поздно ночью
+                         taskline->setRow(r);
+                         taskline->setCol(0);
+                        //
 
                         int lab_y = ui->twTaskField->y();
                         int lab_x = ui->twTaskField->x();
@@ -536,6 +545,7 @@ void MainWindow::saveFileJson()
 //DRAGON DROP!!!!
 void MainWindow::mousePressEvent(QMouseEvent *event) // Реакция на нажатие мыши в области объекта
 {
+    int col,row;
     DragLabel *child = static_cast<DragLabel*>(childAt(event->pos())); //указатель на объект, который находится в ивенте
  draglist.push_back(*child);
     if (!child)
@@ -544,7 +554,52 @@ void MainWindow::mousePressEvent(QMouseEvent *event) // Реакция на на
 ;
     if (hideall==true) child->hide();
     // Изменение содержимого облачка. Если в строке ввода есть текст, заменить текст облака на вводный
-    if (child->in_edit->text().length()>1)  { child->setText(child->in_edit->text()); }
+    if (child->in_edit->text().length()>1)
+    {
+        child->setText(child->in_edit->text());
+        // Этот кусок добавлен Варгушей поздно ночью
+
+         col=child->getCol();
+         row=child->getRow();
+         cout<<"row before = "<<endl;
+         ui->twTaskField->setEnabled(true);
+
+        if(col==0) { ui->twTaskField->setItem(row,1,new QTableWidgetItem(child->in_edit->text())); }
+                if(col==1) { ui->twHangedTaskField->setItem(row-1,1,new QTableWidgetItem(child->in_edit->text())); cout<<"row="<<child->getRow(); }
+        else cout<<"col="<<col<<endl;
+         // ACHTUNG
+                Note note;
+                note.setTitle(child->getText());
+                note.setDateStart(selDate_);
+                note.setDateEnd(selDate_);
+//                note.setTimeStart(QTime::fromString(ui->twHangedTaskField->item(0,0)->text()));
+//                note.setTimeEnd(QTime::fromString(ui->twHangedTaskField->item(1,0)->text()));
+
+                if(TimeLine_.size() != 0)
+                {
+                    QLinkedList<Note>::iterator it;
+                    int i = 0;
+                    if(isSelDatePresented())
+                    {
+                        for(it = TimeLine_.begin(); it != TimeLine_.end(); ++it)
+                        {
+                            if(it->getDateStart() == note.getDateStart())
+                            {
+                                TimeLine_.insert(it, note);
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+                    else
+                        TimeLine_.push_back(note);
+                }
+                else
+                    TimeLine_.append(note);
+                saveFileJson();
+
+                //ACHTUNG!
+    }
     if (child->getEdit()==true) child->setEdit(false); else child->setEdit(true);
     // Сокрытие/отображение лайнедита после клика
 
@@ -553,7 +608,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) // Реакция на на
     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
 
     //Передаём в поток данных текст объекта, его координату и состояние лайнедита
-    dataStream << child->getText() << QPoint(hotSpot) << child->getEdit() ;
+    dataStream << child->getText() << QPoint(hotSpot) << child->getEdit()<< child->getRow() << child->getCol() ;
     QMimeData *mimeData = new QMimeData;
        mimeData->setData("application/x-fridgemagnet", itemData);
        mimeData->setText(child->getText());
@@ -629,12 +684,16 @@ void MainWindow::dropEvent(QDropEvent *event) //Drop event, метод опис�
 
                 QString text;
                 QPoint offset;
+                int col,row;
 
                 bool edit;
-                dataStream >>text >> offset >> edit;
+                dataStream >>text >> offset >> edit>> col>>row ;
 
                 DragLabel *newLabel = new DragLabel(text, this,edit);
+                        newLabel->setRow(row);
+                        newLabel->setCol(col);
                          newLabel->move(event->pos() - offset);
+                         if (newLabel->pos().x()>440) newLabel->setCol(1); else newLabel->setCol(0);
                         //отображает при двух кликах, можно делать паузу между кликами или тыкать что угодно
 
 
