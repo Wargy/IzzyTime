@@ -33,7 +33,5 @@ module.exports = function (app) {
 
     app.use(app.router);
 
-    if ('development' == app.get('env')) {
-        app.use(express.errorHandler());
-    }
+
 };

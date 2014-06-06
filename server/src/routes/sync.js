@@ -19,19 +19,23 @@ module.exports = function (app) {
 //            return;
 //        }
         if (req.is('*/json')) {
-            var body=req.body;
-            console.log(body);
+            var body = req.body;
+
+//            console.log(body);
 //            sql='update test set name=marina value=efimova;';
 //pool.query(sql,function(err, rows, fields) {
 //                if (err) throw err;
 //
 //               // console.log('The solution is: ', rows[0].solution);});
 //});
-           // var record=JSON.parse(body);
-         //   var json=JSON.stringify(body);
-db.update(body);
-            res.writeHead(200,{'Content-Type':'application/json'});
-            res.end(JSON.stringify(jsonObject));
+            // var record=JSON.parse(body);
+            //   var json=JSON.stringify(body);
+            for (i = 0; i < body.length; i++) {
+               // console.log(body[i]);
+            if (body[i].saved == 0) {
+                db.update(body[i]);
+            }
+        }
             return;
         }
 
