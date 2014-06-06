@@ -28,4 +28,5 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     IzzyTime.qrc \
+    IzzyTime.qrc \
     IzzyTime.qrc

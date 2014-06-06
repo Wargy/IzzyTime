@@ -22,6 +22,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+
 #define table_space 55 //отступ слева от первой колонки таблицы задач со временем
 
 using namespace std;
@@ -110,17 +111,22 @@ void MainWindow::slotFinished(QNetworkReply* reply)
 
 void MainWindow::sync(QByteArray data)
 {
-    /*QUrl url("link!");
-    QNetworkRequest request(url);
-
+    QUrl url("http://localhost/sync");
+    url.setPort(8081);
+  //  url.setPort(8081);
+  //  url.setHost("localhost");
+  //  url.setPath("localhost/sync");
+    QNetworkRequest request;
+request.setUrl(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
 //    QJsonDocument doc(json);
 //    QByteArray data(doc.toJson());
-
+qDebug()<<request.header(QNetworkRequest::ContentTypeHeader);
     qDebug() << "Sync" << QString::fromUtf8(data.data(), data.size());
 
-    manager_->post(request, data);*/
+   QNetworkReply *reply= manager_->post(request, data);
+
+
 }
 
 
@@ -492,11 +498,11 @@ bool MainWindow::isSelDatePresented()
 
 void MainWindow::sendFile()
 {
-    QMessageBox::information(this,
-                             "Timer Event",
-                             "Just a proof for successful timer work.\n"
-                             "That's all. Really.",
-                             QMessageBox::Ok);
+//    QMessageBox::information(this,
+//                             "Timer Event",
+//                             "Just a proof for successful timer work.\n"
+//                             "That's all. Really.",
+//                             QMessageBox::Ok);
     //тут запись в файл и отправка на сервер
     if(changed_)
     {
@@ -504,7 +510,7 @@ void MainWindow::sendFile()
         //(да, в "несохраненном" виде - на случай отсутствия сети)
         saveFileJson();
 
-        fpjson_.setFileName("data.json");
+        fpjson_.setFileName("./data2.json");
         if(!fpjson_.open(QIODevice::ReadOnly))
         {
             QMessageBox::warning(this,
@@ -552,17 +558,17 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 {
     json["saved"]     = note.getStatus();
-    json["DateStart"] = note.getDateStart().toString();
-    json["DateEnd"]   = note.getDateEnd().toString();
-    json["TimeStart"] = note.getTimeStart().toString();
-    json["TimeEnd"]   = note.getTimeEnd().toString();
+    json["DateStart"] = note.getDateStart().isNull()?"null":note.getDateStart().toString("yyyy-MM-dd");
+    json["DateEnd"]   = note.getDateEnd().isNull()?"null":note.getDateEnd().toString("yyyy-MM-dd");
+    json["TimeStart"] = note.getTimeStart().isNull()?"null":note.getTimeStart().toString("HH:mm:ss");
+    json["TimeEnd"]   = note.getTimeEnd().isNull()?"null":note.getTimeEnd().toString("HH:mm:ss");
     json["Title"]     = note.getTitle();
     json["Text"]      = note.getText();
 }
 
 void MainWindow::loadFileJson()
 {
-    fpjson_.setFileName("data.json");
+    fpjson_.setFileName("./data2.json");
     if(!fpjson_.open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this,
@@ -589,7 +595,7 @@ void MainWindow::loadFileJson()
 
 void MainWindow::saveFileJson()
 {
-    fpjson_.setFileName("data.json");
+    fpjson_.setFileName("./data2.json");
     if(!fpjson_.open(QIODevice::WriteOnly))
     {
         QMessageBox::warning(this,
