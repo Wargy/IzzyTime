@@ -6,23 +6,29 @@ var db=require('./database');
 
 module.exports = function (app) {
     app.post('/sync', function (req, res) {
-
 //        if (req.isAuthenticated()) {
 //            //res.redirect('/');
 //            console.log("synchronization handler");
 //            return;
 //        }
+console.log(req.contentType);
         if (req.is('*/json')) {
-            var body = JSON.parse(req.body);
+    //        console.log(req.body);
+            var body = (req.body);
 
             for (i = 0; i < body['TimeLine'].length; i++) {
-
-            if (body['TimeLine'][i].saved == 0) {
-                db.update(body[i]);
+              //  console.log("body.[i]=\n");
+console.log((body['TimeLine'][i]));
+            if ((body['TimeLine'][i]).saved == 0) {
+                console.log("FALSE");
+                db.update(body['TimeLine'][i]);
             }
         }
-            return;
+            res.writeHead(200,{'Content-Type':'application/json'});
+          //  res.end(JSON.stringify(jsonObject));
+            res.end();
+
         }
 
     });
-}
+};

@@ -13,20 +13,10 @@ pool=mysql.createPool({
     }
 );
 var query;
-//var record={
-//    DataTimeUpdate:"",
-//    DataTimeStart:"",
-//    DataTimeEnd:"",
-//    Title:"",
-//    Text:"",
-//    Priority:"",
-//    Reminder:"",
-//    Color:"",
-//    WeekMask:""
-//}
+
 exports.getConnection = function(){
     return pool.getConnection();
-}
+};
 exports.authorization=function(user,password){
     pool.getConnection(function(err, connection){
         if (err) throw err;
@@ -34,20 +24,23 @@ exports.authorization=function(user,password){
         connection.query(query, function (err, rows) {
             //connection.release();
             if (err) {
+
                 throw err;
+
             } else {
                 if(rows.numRows()>0){
                     return rows;
                 }else{
                     return false;
                 }
-                console.log(rows);
+
 
             }
-            connection.release();
+
         });
     });
-}
+    connection.release();
+};
 exports.update=function(record){
     pool.getConnection(function(err, connection){
         if (err) throw err;
@@ -73,10 +66,8 @@ exports.update=function(record){
             connection.release();
         });
     });
-}
+};
 
 exports.select=function(date_start,date_end){
 
-}
-module
-exports;
+};
