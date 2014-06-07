@@ -510,7 +510,7 @@ void MainWindow::sendFile()
         //(да, в "несохраненном" виде - на случай отсутствия сети)
         saveFileJson();
 
-        fpjson_.setFileName("./data2.json");
+        fpjson_.setFileName("data.json");
         if(!fpjson_.open(QIODevice::ReadOnly))
         {
             QMessageBox::warning(this,
@@ -536,10 +536,17 @@ void MainWindow::sendFile()
 void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 {
     note.setStatus(json["saved"].toBool());
-    note.setDateStart(QDate::fromString(json["DateStart"].toString()));
-    note.setDateEnd(QDate::fromString(json["DateEnd"].toString()));
-    note.setTimeStart(QTime::fromString(json["TimeStart"].toString()));
-    note.setTimeEnd(QTime::fromString(json["TimeEnd"].toString()));
+
+    note.setDateStart(QDate::fromString(json["DateStart"].toString("yyyy-MM-dd")));
+    note.setDateEnd(QDate::fromString(json["DateEnd"].toString("yyyy-MM-dd")));
+
+    if(json["TimeStart"].toString() != "null")
+        note.setTimeStart(QTime::fromString(json["TimeStart"].toString("HH:mm:ss")));
+
+    if(json["TimeEnd"].toString() != "null")
+        note.setTimeEnd(QTime::fromString(json["TimeEnd"].toString("HH:mm:ss")));
+
+
     note.setTitle(json["Title"].toString());
     note.setText(json["Text"].toString());
 //    item.Priority
@@ -558,8 +565,8 @@ void MainWindow::readJsonObject(const QJsonObject json, Note &note)
 void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 {
     json["saved"]     = note.getStatus();
-    json["DateStart"] = note.getDateStart().isNull()?"null":note.getDateStart().toString("yyyy-MM-dd");
-    json["DateEnd"]   = note.getDateEnd().isNull()?"null":note.getDateEnd().toString("yyyy-MM-dd");
+    json["DateStart"] = note.getDateStart().toString("yyyy-MM-dd");//.isNull()?"null":note.getDateStart().toString("yyyy-MM-dd");
+    json["DateEnd"]   = note.getDateEnd().toString("yyyy-MM-dd");//.isNull()?"null":note.getDateEnd().toString("yyyy-MM-dd");
     json["TimeStart"] = note.getTimeStart().isNull()?"null":note.getTimeStart().toString("HH:mm:ss");
     json["TimeEnd"]   = note.getTimeEnd().isNull()?"null":note.getTimeEnd().toString("HH:mm:ss");
     json["Title"]     = note.getTitle();
@@ -568,7 +575,7 @@ void MainWindow::writeJsonObject(QJsonObject &json, Note note)
 
 void MainWindow::loadFileJson()
 {
-    fpjson_.setFileName("./data2.json");
+    fpjson_.setFileName("data.json");
     if(!fpjson_.open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this,
@@ -595,7 +602,7 @@ void MainWindow::loadFileJson()
 
 void MainWindow::saveFileJson()
 {
-    fpjson_.setFileName("./data2.json");
+    fpjson_.setFileName("data.json");
     if(!fpjson_.open(QIODevice::WriteOnly))
     {
         QMessageBox::warning(this,
