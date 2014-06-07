@@ -20,17 +20,6 @@
         "prefix": "it:demo:023:"
     },
 
-    "auth": {
-        "fb": {
-            "app_id": 0,
-            "secret": "secret"
-        },
-        "vk": {
-            "app_id": 0,
-            "secret": "secret"
-        }
-    },
-
     "serverDB": {
         "host": "localhost",
         "port": 3306,

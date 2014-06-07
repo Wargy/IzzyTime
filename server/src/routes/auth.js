@@ -20,10 +20,10 @@ module.exports = function (app) {
     });
 
     app.post('/auth', passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/auth',
-        failureFlash: true })
+            successRedirect: '/',
+            failureRedirect: '/auth',
+            failureFlash: true })
     );
 
 
-}
+};
